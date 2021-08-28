@@ -185,12 +185,15 @@
   <ItemGroup>
     <ClInclude Include="CChatRecords.h" />
     <ClInclude Include="CFriendList.h" />
+    <ClInclude Include="CFunctions.h" />
     <ClInclude Include="CInjectTools.h" />
     <ClInclude Include="CMain.h" />
+    <ClInclude Include="CMultiOpen.h" />
     <ClInclude Include="CMyTableCtrl.h" />
-    <ClInclude Include="CResult.h" />
     <ClInclude Include="data.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="HTTPRequest.hpp" />
+    <ClInclude Include="md5.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="My_InjectTools.h" />
     <ClInclude Include="My_InjectToolsDlg.h" />
@@ -201,10 +204,12 @@
   <ItemGroup>
     <ClCompile Include="CChatRecords.cpp" />
     <ClCompile Include="CFriendList.cpp" />
+    <ClCompile Include="CFunctions.cpp" />
     <ClCompile Include="CInjectTools.cpp" />
     <ClCompile Include="CMain.cpp" />
+    <ClCompile Include="CMultiOpen.cpp" />
     <ClCompile Include="CMyTableCtrl.cpp" />
-    <ClCompile Include="CResult.cpp" />
+    <ClCompile Include="md5.cpp" />
     <ClCompile Include="My_InjectTools.cpp" />
     <ClCompile Include="My_InjectToolsDlg.cpp" />
     <ClCompile Include="pch.cpp">
@@ -213,6 +218,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="test_MD5.cpp" />
+    <ClCompile Include="test_HttpRequest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MyInjectTools.rc" />

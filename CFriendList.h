@@ -43,4 +43,7 @@ public:
 	afx_msg void OnBnClickedReversechoose();
 	afx_msg void OnBnClickedBtSeach2();
 	afx_msg void OnLoad();
+	afx_msg void OnSendimg();
+	afx_msg void OnSendfile();
+	afx_msg void OnSendcard();
 };

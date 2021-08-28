@@ -9,6 +9,7 @@
 #define IDD_PARA2                       141
 #define IDD_CHAT_RECORDS                141
 #define IDD_RESULT                      143
+#define IDD_FUNCTIONS                   143
 #define IDR_MENU2                       145
 #define ID                              1000
 #define IDC_SHOW_QRPIC                  1000
@@ -34,6 +35,11 @@
 #define IDC_CH_Forward                  1025
 #define IDC_CH_Save                     1026
 #define IDC_BT_Seach2                   1027
+#define IDC_BT_MULTI                    1028
+#define IDC_BUTTON2                     1029
+#define IDC_BUTTON3                     1030
+#define IDC_CHECK1                      1031
+#define IDC_CH_Post                     1031
 #define ID_Menu                         32771
 #define ID_Menu32772                    32772
 #define Friend_main                     32773
@@ -49,14 +55,20 @@
 #define ID_32779                        32783
 #define FL_Load                         32784
 #define FList_Load                      32785
+#define ID_32786                        32786
+#define ID_32787                        32787
+#define ID_32788                        32788
+#define ID_SendImg                      32789
+#define ID_SendFile                     32790
+#define ID_SendCard                     32791
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
-#define _APS_NEXT_COMMAND_VALUE         32786
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_RESOURCE_VALUE        149
+#define _APS_NEXT_COMMAND_VALUE         32792
+#define _APS_NEXT_CONTROL_VALUE         1032
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

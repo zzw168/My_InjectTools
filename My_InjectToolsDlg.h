@@ -38,8 +38,12 @@ public:
 	void RunSingle();
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
+	afx_msg void OnBnClickedButton3();
 };
 
 #include <string>
 
 bool isFileExists_fopen(const std::string& name);
+
+string md5(string& strPlain);

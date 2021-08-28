@@ -11,6 +11,7 @@
 #include <string>
 #include <locale.h>
 #include "CMain.h"
+#include <fstream>
 
 
 DWORD g_index = 0;
@@ -35,22 +36,48 @@ void CChatRecords::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1, m_ChatRecord);
 	DDX_Control(pDX, IDC_ED_Accept, Accept_id);
 	DDX_Control(pDX, IDC_ED_Send, Send_id);
-	DDX_Control(pDX, IDC_BT_Begin, BT_Begin);
 	DDX_Control(pDX, IDC_ED_MB, m_Member);
 	DDX_Control(pDX, IDC_CH_All, m_CheckAll);
+	DDX_Control(pDX, IDC_CH_Post, m_CH_Post);
 }
 
 
 BEGIN_MESSAGE_MAP(CChatRecords, CDialogEx)
 	ON_MESSAGE(WM_ShowMessage, &CChatRecords::OnShowmessage)
-	ON_BN_CLICKED(IDC_BUTTON1, &CChatRecords::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BT_Begin, &CChatRecords::OnBnClickedBtBegin)
 	ON_MESSAGE(WM_Set_AcceptED, &CChatRecords::OnSetAccepted)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CChatRecords::OnNMDblclkList1)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CChatRecords::OnLvnItemchangedList1)
+	ON_BN_CLICKED(IDC_CH_Post, &CChatRecords::OnBnClickedChPost)
 END_MESSAGE_MAP()
 
 
 // CChatRecords 消息处理程序
+
+#include "HTTPRequest.hpp"
+#include <iostream>
+
+string my_HttpPost(string& host, string& data)	//
+{
+	string result = "ok";
+	try
+	{
+		// you can pass http::InternetProtocol::V6 to Request to make an IPv6 request
+		http::Request request(host);
+
+		// send a post request
+		const http::Response postResponse = request.send("POST", data, {
+			"Content-Type: application/x-www-form-urlencoded"
+			}, std::chrono::seconds(2));
+		//std::cout << std::string(postResponse.body.begin(), postResponse.body.end()) << '\n'; // print the result
+		//result = string(postResponse.body.begin(), postResponse.body.end());
+	}
+	catch (const std::exception& e)
+	{
+		//std::cerr << "Request failed, error: " << e.what() << '\n';
+		result = string(e.what());
+	}
+	return result;
+}
 
 //************************************************************
 // 函数名称: OnShowmessage
@@ -84,76 +111,94 @@ afx_msg LRESULT CChatRecords::OnShowmessage(WPARAM wParam, LPARAM lParam)
 
 	//转发信息到 指定微信id***********************************************
 	CString  Ed_Accept;
-	GetDlgItem(IDC_ED_Accept)->GetWindowText(Ed_Accept);
-	//string s_Ed_Accept =CT2A(Ed_Accept.GetString());
+	GetDlgItem(IDC_ED_Accept)->GetWindowText(Ed_Accept);	//转发接收者ID
+	string s_Ed_Accept =CT2A(Ed_Accept.GetString());
 	CString  Ed_wxid;
-	GetDlgItem(IDC_ED_Send)->GetWindowText(Ed_wxid);
+	GetDlgItem(IDC_ED_Send)->GetWindowText(Ed_wxid);		//消息发送者ID
 	string s_Ed_wxid = CT2A(Ed_wxid.GetString());
 	CString  Ed_wxmember;
 	GetDlgItem(IDC_ED_MB)->GetWindowText(Ed_wxmember);
-	string s_Ed_wxmember = CT2A(Ed_wxmember.GetString());
+	string s_Ed_wxmember = CT2A(Ed_wxmember.GetString());	//消息发送者
 	if ((0 == strcmp(type.c_str(), "文字")) 
 		&& (0 == strcmp(wxid.c_str(), s_Ed_wxid.c_str()))
 		&& ((0 == strcmp(sendername.c_str(), s_Ed_wxmember.c_str()))||(m_CheckAll.GetCheck()))
-		&&(Ed_Accept !="")) {
+		&&((Ed_Accept !="")||(m_CH_Post.GetCheck()))) {
 		//string content = Wchar_tToString(msg->content);
-		string s;
-		s = content + " 发送者:" + wxid + " 成员:" + sendername;
-		CString m_Content;
-		m_Content= s.c_str();
-		//m_Content = content.c_str();
+		string& m_content = content + "\n发送者:" + wxid + " 成员:" + sendername +"\n---------------------------";
 
 		//查找窗口
 		CWnd* pWnd = CWnd::FindWindow(NULL, L"WeChatHelper");
+		if (pWnd != NULL) {
+			try {
+				CMain* m_Main = (CMain*)this->GetParent()->GetParent();
+				if (m_Main->m_MyTable.m_Dia[0]->IsDlgButtonChecked(IDC_CH_Forward)) {
+					CListCtrl* m_ListCtrl = (CListCtrl*)m_Main->m_MyTable.m_Dia[0]->GetDlgItem(IDC_FRIENDLIST);
+					int m_num = m_ListCtrl->GetItemCount();
+					for (int i = 0; i < m_num; i++) {
+						if (m_ListCtrl->GetCheck(i)) {
+							string id_wx = CT2A(m_ListCtrl->GetItemText(i, 1));
 
-		CMain* m_Main = (CMain*)this->GetParent()->GetParent();
-		if (m_Main->m_MyTable.m_Dia[0]->IsDlgButtonChecked(IDC_CH_Forward)) {
-			CListCtrl* m_ListCtrl = (CListCtrl*)m_Main->m_MyTable.m_Dia[0]->GetDlgItem(IDC_FRIENDLIST);
-			int m_num =m_ListCtrl->GetItemCount();
-			for (int i = 0; i < m_num; i++) {
-				if (m_ListCtrl->GetCheck(i)) {
-					CString id_wx = m_ListCtrl->GetItemText(i, 1);
+							//填充数据到结构体
+							MessageStruct* message = new MessageStruct(StringToWchar_t(id_wx), StringToWchar_t(m_content));
+							COPYDATASTRUCT MessageData;
+							MessageData.dwData = WM_SendTextMessage;
+							MessageData.cbData = sizeof(MessageStruct);
+							MessageData.lpData = message;
 
+							//发送消息
+							pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
+							Sleep(200);
+							//清空文本
+							delete message;
+						}
+					}
+				}
+				//转发信息到 指定微信id**************************************************
+				else if (Ed_Accept != "") {
 					//填充数据到结构体
-					MessageStruct* message = new MessageStruct(id_wx, m_Content);
+					MessageStruct* message = new MessageStruct(StringToWchar_t(s_Ed_Accept), StringToWchar_t(m_content));
 					COPYDATASTRUCT MessageData;
 					MessageData.dwData = WM_SendTextMessage;
 					MessageData.cbData = sizeof(MessageStruct);
 					MessageData.lpData = message;
 
-					//发送消息
+					////发送消息
 					pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
-					Sleep(200);
+
 					//清空文本
 					delete message;
 				}
 			}
+			catch (exception e) {
+				MessageBox(LPCTSTR(e.what()));
+			}
 		}
 		else {
-			//填充数据到结构体
-			MessageStruct* message = new MessageStruct(Ed_Accept, m_Content);
-			COPYDATASTRUCT MessageData;
-			MessageData.dwData = WM_SendTextMessage;
-			MessageData.cbData = sizeof(MessageStruct);
-			MessageData.lpData = message;
-
-			//发送消息
-			pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
-
-			//清空文本
-			delete message;
+			MessageBox(L"找不到 WeChatHelper 窗口");
 		}
-		m_Content = "";
-	//转发信息到 指定微信id**************************************************
-	
-		//保存聊天记录到本地
-		/*std::string type = Wchar_tToString(msg->sztype);
-		std::string wxid = Wchar_tToString(msg->wxname);
-		std::string source = Wchar_tToString(msg->source);
-		std::string msgSender = Wchar_tToString(msg->sendername);
-		std::string content = Wchar_tToString(msg->content);
-		*/
-		//Log(type.c_str(), wxid.c_str(), source.c_str(), msgSender.c_str(), content.c_str());
+		//post信息到 指定IP地址**************************************************
+		if (m_CH_Post.GetCheck() == TRUE) {
+			// TODO: 在此添加命令处理程序代码
+			wstring m_PostIp = L"PostLists.txt";
+			// 以读模式打开文件
+			ifstream infile;
+			infile.open(m_PostIp);
+			string m_data = "";
+			while (getline(infile, m_data))
+			{
+				if (m_data.find("http")!= string::npos) {
+					string& host = m_data;
+					string result = my_HttpPost(host, m_content);
+					if (result != "ok") {
+						cout << result << endl;
+						m_CH_Post.SetCheck(FALSE);
+					}
+				}
+				
+			}
+			// 关闭打开的文件
+			infile.close();
+		}
 	}
 
 	return 0;
@@ -226,10 +271,11 @@ string Wchar_tToString(wchar_t* wchar)
 //***********************************************************
 wchar_t* StringToWchar_t(const std::string& str)
 {
-	wchar_t* m_chatroommmsg = new wchar_t[str.size() * 2];  //
-	memset(m_chatroommmsg, 0, str.size() * 2);
-	setlocale(LC_ALL, "zh_CN.UTF-8");
-	swprintf(m_chatroommmsg, str.size() * 2, L"%S", str.c_str());
+	wchar_t* m_chatroommmsg = new wchar_t[str.size()+1];  //
+	memset(m_chatroommmsg, 0, str.size()+1);
+	//setlocale(LC_ALL, "zh_CN.UTF-8");
+	setlocale(LC_ALL, "chs");
+	swprintf(m_chatroommmsg, str.size()+1, L"%S", str.c_str());
 
 	return m_chatroommmsg;
 }
@@ -300,26 +346,6 @@ BOOL CChatRecords::OnInitDialog()
 }
 
 
-void CChatRecords::OnBnClickedButton1()
-{
-	// TODO: 在此添加控件通知处理程序代码
-}
-
-
-void CChatRecords::OnBnClickedBtBegin()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	SetDlgItemText(IDC_ED_Accept, TEXT("231"));
-	CMain* m_Main = (CMain*)this->GetParent()->GetParent();
-	CString s;
-	m_Main->m_MyTable.m_Dia[0]->GetDlgItemText(IDC_CH_Forward, s);
-	if (m_Main->m_MyTable.m_Dia[0]->IsDlgButtonChecked(IDC_CH_Forward)) {
-		MessageBox(s);
-	}
-	
-}
-
-
 afx_msg LRESULT CChatRecords::OnSetAccepted(WPARAM wParam, LPARAM lParam)
 {
 	//取数据
@@ -386,4 +412,18 @@ BOOL CChatRecords::PreTranslateMessage(MSG* pMsg)
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)   return   TRUE;
 	else
 		return   CDialog::PreTranslateMessage(pMsg);
+}
+
+
+void CChatRecords::OnLvnItemchangedList1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+}
+
+
+void CChatRecords::OnBnClickedChPost()
+{
+	// TODO: 在此添加控件通知处理程序代码
 }

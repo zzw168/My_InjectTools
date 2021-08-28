@@ -30,7 +30,7 @@ struct ChatMessageData
 	wchar_t wxname[0x200];			//微信名称/群名称
 	wchar_t sender[0x100];			//消息发送者
 	wchar_t sendername[0x100];		//消息发送者昵称
-	wchar_t content[0x5000];	//消息内容
+	wchar_t content[0x10000];	//消息内容
 };
 
 //发送名片消息结构体

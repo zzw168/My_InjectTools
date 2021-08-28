@@ -41,6 +41,8 @@ BEGIN_MESSAGE_MAP(CMyInjectToolsDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_SHOW_QRPIC, &CMyInjectToolsDlg::OnBnClickedShowQrpic)
 	ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_BUTTON1, &CMyInjectToolsDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CMyInjectToolsDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CMyInjectToolsDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -242,4 +244,56 @@ void CMyInjectToolsDlg::OnBnClickedButton1()
 	// TODO: 在此添加控件通知处理程序代码
 	CMain mainWindow;
 	mainWindow.DoModal();
+}
+
+#include "md5.h"
+
+string md5(string& strPlain)	//字符串MD5加密
+{
+	MD5_CTX mdContext;
+	//int bytes;
+	//unsigned char data[1024];
+
+	MD5Init(&mdContext);
+	MD5Update(&mdContext, (unsigned char*)const_cast<char*>(strPlain.c_str()), strPlain.size());
+	MD5Final(&mdContext);
+
+	string md5;
+	char buf[3];
+	for (int i = 0; i < 16; i++)
+	{
+		sprintf_s(buf, "%02x", mdContext.digest[i]);
+		md5.append(buf);
+	}
+	return md5;
+}
+
+void CMyInjectToolsDlg::OnBnClickedButton2()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	string str = "zzw";
+	string strMD5 = md5(str);
+	MessageBox(CA2T(strMD5.c_str()));
+	printf(strMD5.c_str());
+}
+
+#include "HTTPRequest.hpp"
+#include "CChatRecords.h"
+#include <iostream>
+
+void CMyInjectToolsDlg::OnBnClickedButton3()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	try
+	{
+
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Request failed, error: " << e.what() << '\n';
+	}
+	string host = "http://127.0.0.1:1314/test";
+	string data = "zzw168";
+	string result = my_HttpPost(host, data);
+	MessageBox(CA2T(result.c_str()));
 }

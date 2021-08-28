@@ -8,6 +8,7 @@
 
 #include "CFriendList.h"
 #include "CChatRecords.h"
+#include "CFunctions.h"
 
 #include "data.h"
 #include "message.h"
@@ -37,6 +38,7 @@ BEGIN_MESSAGE_MAP(CMain, CDialogEx)
 	ON_WM_COPYDATA()
 	ON_WM_SIZE()
 	ON_MESSAGE(WM_MYMESSAGE, &CMain::OnMymessage)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CMain::OnTcnSelchangeTab1)
 END_MESSAGE_MAP()
 
 
@@ -61,10 +63,10 @@ BOOL CMain::OnInitDialog()
 
 	m_MyTable.m_Dia[0] = new CFriendList();
 	m_MyTable.m_Dia[1] = new CChatRecords();
-	m_MyTable.m_Dia[2] = new CResult();
+	m_MyTable.m_Dia[2] = new CFunctions();
 
 	//创建子窗口
-	UINT DiaIds[3] = { IDD_FRIEND_LIST,IDD_CHAT_RECORDS ,IDD_RESULT };
+	UINT DiaIds[3] = { IDD_FRIEND_LIST,IDD_CHAT_RECORDS ,IDD_FUNCTIONS };
 	for (int i = 0; i < 3; i++)
 	{
 		m_MyTable.m_Dia[i]->Create(DiaIds[i], &m_MyTable);
@@ -135,6 +137,7 @@ void CMain::OnSize(UINT nType, int cx, int cy)
 	// TODO: 在此处添加消息处理程序代码
 	m_MyTable.m_Dia[0]->MoveWindow(0, 20, cx, cy-15);
 	m_MyTable.m_Dia[1]->MoveWindow(0, 20, cx, cy-15);
+	m_MyTable.m_Dia[2]->MoveWindow(0, 20, cx, cy - 15);
 }
 
 
@@ -144,3 +147,10 @@ afx_msg LRESULT CMain::OnMymessage(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+
+
+void CMain::OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+}

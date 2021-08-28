@@ -29,11 +29,9 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	CListCtrl m_ChatRecord;
-	afx_msg void OnBnClickedButton1();
 	CEdit Accept_id;
 	CEdit Send_id;
-	CButton BT_Begin;
-	afx_msg void OnBnClickedBtBegin();
+
 protected:
 	afx_msg LRESULT OnSetAccepted(WPARAM wParam, LPARAM lParam);
 public:
@@ -41,7 +39,12 @@ public:
 	CEdit m_Member;
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	CButton m_CheckAll;
+	CButton m_CH_Post;
+	afx_msg void OnLvnItemchangedList1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBnClickedChPost();
 };
+
+string my_HttpPost(string& host, string& data);
 
 string string_To_UTF8(const std::string& str);
 

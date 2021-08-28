@@ -5,7 +5,6 @@
 #include "CFriendList.h"
 //#include "CFriendInfo.h"
 
-#include "CResult.h"
 
 // CMain 对话框
 
@@ -31,10 +30,9 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnTcnSelchangeFriendlist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
-
-	CResult m_result;
-	CFriendList FriendList;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 protected:
 	afx_msg LRESULT OnMymessage(WPARAM wParam, LPARAM lParam);
+public:
+	afx_msg void OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult);
 };

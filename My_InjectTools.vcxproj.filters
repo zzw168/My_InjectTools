@@ -25,6 +25,12 @@
     <Filter Include="自定义项\结构体">
       <UniqueIdentifier>{8984f802-7c02-4f0c-bd85-eb967401528c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MD5">
+      <UniqueIdentifier>{4b7d479c-17ed-40eb-8891-20999d4b2ab8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTPRequest">
+      <UniqueIdentifier>{6ed83746-8194-4be7-a450-bdd499804b16}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="My_InjectTools.h">
@@ -60,14 +66,23 @@
     <ClInclude Include="data.h">
       <Filter>自定义项\结构体</Filter>
     </ClInclude>
-    <ClInclude Include="CResult.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CFriendList.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CChatRecords.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CFunctions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CMultiOpen.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>MD5</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPRequest.hpp">
+      <Filter>HTTPRequest</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -89,14 +104,26 @@
     <ClCompile Include="CMyTableCtrl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CResult.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CFriendList.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CChatRecords.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CFunctions.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CMultiOpen.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.cpp">
+      <Filter>MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="test_MD5.cpp">
+      <Filter>MD5</Filter>
+    </ClCompile>
+    <ClCompile Include="test_HttpRequest.cpp">
+      <Filter>HTTPRequest</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

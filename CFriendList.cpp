@@ -54,6 +54,9 @@ BEGIN_MESSAGE_MAP(CFriendList, CDialogEx)
 	ON_BN_CLICKED(IDC_Reversechoose, &CFriendList::OnBnClickedReversechoose)
 	ON_BN_CLICKED(IDC_BT_Seach2, &CFriendList::OnBnClickedBtSeach2)
 	ON_COMMAND(FList_Load, &CFriendList::OnLoad)
+	ON_COMMAND(ID_SendImg, &CFriendList::OnSendimg)
+	ON_COMMAND(ID_SendFile, &CFriendList::OnSendfile)
+	ON_COMMAND(ID_SendCard, &CFriendList::OnSendcard)
 END_MESSAGE_MAP()
 
 
@@ -191,14 +194,14 @@ afx_msg LRESULT CFriendList::OnMamessage(WPARAM wParam, LPARAM lParam)
 		if (m_num > 1) {
 			vector< vector<CString> > m_arry;
 			vector<CString> m_item;
-			for (int i = m_num-1; i >= 0; i--) {
+			for (int i = m_num - 1; i >= 0; i--) {
 				string pa = CT2A(m_FriendList.GetItemText(i, 4).GetString());
 				cout << pa << endl;
 				string pb = CT2A(wxid.GetString());
 				int idx = pa.find(pb);	//在pb中查找pa
 				if (idx != string::npos) {
 					m_item.resize(0);
-					for (int j = 0; j <m ; j++) {
+					for (int j = 0; j < m; j++) {
 						m_item.push_back(m_FriendList.GetItemText(i, j));
 					}
 					m_arry.push_back(m_item);
@@ -207,13 +210,19 @@ afx_msg LRESULT CFriendList::OnMamessage(WPARAM wParam, LPARAM lParam)
 				}
 			}
 			int n = size(m_arry);
-			if (n>0)
+			if (n > 0){
 				for (int k = 0; k < n; k++) {
 					m_FriendList.InsertItem(0, m_arry[k][0]);
 					for (int l = 1; l < m; l++) {
 						m_FriendList.SetItemText(0, l, m_arry[k][l]);
 					}
 				}
+				for (int o = n - 1; o >= 0; o--) {
+					//m_FriendList.EnsureVisible(o, FALSE);
+					m_FriendList.SetItemState(o, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+					m_FriendList.SetFocus();
+				}
+			}
 			m_arry.clear();
 		}
 	}
@@ -222,22 +231,28 @@ afx_msg LRESULT CFriendList::OnMamessage(WPARAM wParam, LPARAM lParam)
 		int m_num = m_FriendList.GetItemCount();
 		for (int i = 0; i < m_num; i++) {
 			if (m_FriendList.GetCheck(i)) {
-				//同步控件数据到变量
-				UpdateData(TRUE);
-				//填充数据到结构体
-				MessageStruct* message = new MessageStruct(m_FriendList.GetItemText(i,1), wxid);
 				//查找窗口
 				CWnd* pWnd = CWnd::FindWindow(NULL, L"WeChatHelper");
-				COPYDATASTRUCT MessageData;
-				MessageData.dwData = WM_SendTextMessage;
-				MessageData.cbData = sizeof(MessageStruct);
-				MessageData.lpData = message;
-				//发送消息
-				pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
-				Sleep(200);
-				//清空文本
-				delete message;
-				UpdateData(FALSE);
+				if (pWnd != NULL) {
+					//同步控件数据到变量
+					UpdateData(TRUE);
+					//填充数据到结构体
+					MessageStruct* message = new MessageStruct(m_FriendList.GetItemText(i, 1), wxid);
+					
+					COPYDATASTRUCT MessageData;
+					MessageData.dwData = WM_SendTextMessage;	//发送文本信息标志
+					MessageData.cbData = sizeof(MessageStruct);
+					MessageData.lpData = message;
+					//发送消息
+					pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
+					Sleep(200);
+					//清空文本
+					delete message;
+					UpdateData(FALSE);
+				}
+				else {
+					MessageBox(L"找不到 WeChatHelper 窗口");
+				}
 			}
 		}
 	}
@@ -248,14 +263,9 @@ afx_msg LRESULT CFriendList::OnMamessage(WPARAM wParam, LPARAM lParam)
 void CFriendList::OnBnClickedCancelall()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	CString s;
-	for (int i = 0; i < 100; i++) {
-		s.Format(_T("OK %d"), i);
-		m_FriendList.InsertItem(0, s);        //插入行 
-		m_FriendList.SetItemText(0, 1, L"Visual C++ 6.0");  //设置数据
-		m_FriendList.SetItemText(0, 2, L"Visual C++ 6.0");  //设置数据
-		m_FriendList.SetItemText(0, 3, s + " ok");  //设置数据
-		m_FriendList.SetItemText(0, 4, s + L"Visual C++");  //设置数据
+	for (int i = 0; i < m_FriendList.GetItemCount(); i++)
+	{
+		m_FriendList.SetCheck(i, FALSE);
 	}
 }
 
@@ -291,7 +301,7 @@ void CFriendList::OnBnClickedCheckall()
 }
 
 
-BOOL CFriendList::PreTranslateMessage(MSG* pMsg)
+BOOL CFriendList::PreTranslateMessage(MSG* pMsg)	//取消对话框对 ESC，回车键的响应
 {
 	// TODO: 在此添加专用代码和/或调用基类
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)     return   TRUE;
@@ -361,16 +371,55 @@ void CFriendList::OnLoad()
 	string m_data = "";
 	CString m_str;
 	int n = m_FriendList.GetItemCount();
-	while (getline(infile, m_data))
-	{
-		m_str = m_data.c_str();
-		for (int i = 0; i < n; i++) {
-			if (m_FriendList.GetItemText(i, 1) == m_str) {
-				m_FriendList.SetCheck(i);
+	int m = m_FriendList.GetHeaderCtrl()->GetItemCount();	//列数
+	if (n > 1) {
+		vector< vector<CString> > m_arry;
+		vector<CString> m_item;
+		while (getline(infile, m_data))
+		{
+			m_str = m_data.c_str();
+			for (int i = n-1; i >=0; i--) {
+				if (m_FriendList.GetItemText(i, 1) == m_str) {
+					//m_FriendList.SetCheck(i);
+					m_item.resize(0);
+					for (int j = 0; j < m; j++) {
+						m_item.push_back(m_FriendList.GetItemText(i, j));
+					}
+					m_arry.push_back(m_item);
+					m_FriendList.DeleteItem(i);
+
+				}
 			}
 		}
+		int m_num = size(m_arry);
+		if (m_num > 0) {
+			for (int k = 0; k < m_num; k++) {
+				m_FriendList.InsertItem(0, m_arry[k][0]);
+				for (int l = 1; l < m; l++) {
+					m_FriendList.SetItemText(0, l, m_arry[k][l]);
+				}
+			}
+			for (int o = m_num - 1; o >= 0; o--) {
+				//m_FriendList.EnsureVisible(o, FALSE);
+				m_FriendList.SetCheck(o);
+				m_FriendList.SetItemState(o, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+				m_FriendList.SetFocus();
+			}
+		}
+		m_arry.clear();
 	}
-
+	//如果列表中没有好友信息，则只添加微信ID
+	else {
+		while (getline(infile, m_data))
+		{
+			m_str = m_data.c_str();
+			m_FriendList.InsertItem(0, L"id");
+			m_FriendList.SetItemText(0, 1, m_str);
+		}
+		for (int i = 0; i < m_FriendList.GetItemCount();i++) {
+			m_FriendList.SetCheck(i);
+		}
+	}
 	// 关闭打开的文件
 	infile.close();
 }
@@ -432,3 +481,137 @@ void CFriendList::OnBnClickedReversechoose()
 }
 
 
+
+
+void CFriendList::OnSendimg()
+{
+	// TODO: 在此添加命令处理程序代码
+	CString strFile = _T("");
+	CFileDialog dlgFile(TRUE, NULL, NULL, OFN_HIDEREADONLY, _T("Describe Files (*.jpg)|*.jpg|All Files (*.*)|*.*||"), NULL);
+	if (dlgFile.DoModal())
+	{
+		strFile = dlgFile.GetPathName();
+		if (GetFileAttributes(strFile) == INVALID_FILE_ATTRIBUTES)
+		{
+			MessageBox(L"文件不存在 请重试");
+			return;
+		}
+		if (MessageBox(TEXT("是否确定发送图片："+ strFile), L"提示", MB_YESNO)==IDYES){
+			int m_num = m_FriendList.GetItemCount();
+			for (int i = 0; i < m_num; i++) {
+				if (m_FriendList.GetCheck(i)) {
+					//查找窗口
+					CWnd* pWnd = CWnd::FindWindow(NULL, L"WeChatHelper");
+					if (pWnd != NULL) {
+						//同步控件数据到变量
+						UpdateData(TRUE);
+						//填充数据到结构体
+						MessageStruct* message = new MessageStruct(m_FriendList.GetItemText(i, 1), strFile);
+					
+						COPYDATASTRUCT MessageData;
+						MessageData.dwData = WM_SendImageMessage;	//发送图片信息标志
+						MessageData.cbData = sizeof(MessageStruct);
+						MessageData.lpData = message;
+						//发送消息
+						pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
+						Sleep(200);
+						//清空文本
+						delete message;
+						UpdateData(FALSE);
+					}
+					else {
+						MessageBox(L"找不到 WeChatHelper 窗口");
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void CFriendList::OnSendfile()
+{
+	// TODO: 在此添加命令处理程序代码
+	CString strFile = _T("");
+	CFileDialog dlgFile(TRUE, NULL, NULL, OFN_HIDEREADONLY, _T("Describe Files (*.zip)|*.zip|All Files (*.*)|*.*||"), NULL);
+	if (dlgFile.DoModal())
+	{
+		strFile = dlgFile.GetPathName();
+		if (GetFileAttributes(strFile) == INVALID_FILE_ATTRIBUTES)
+		{
+			MessageBox(L"文件不存在 请重试");
+			return;
+		}
+		if (MessageBox(TEXT("是否确定发送图片：" + strFile), L"提示", MB_YESNO) == IDYES) {
+			int m_num = m_FriendList.GetItemCount();
+			for (int i = 0; i < m_num; i++) {
+				if (m_FriendList.GetCheck(i)) {
+					//查找窗口
+					CWnd* pWnd = CWnd::FindWindow(NULL, L"WeChatHelper");
+					if (pWnd != NULL) {
+						//同步控件数据到变量
+						UpdateData(TRUE);
+						//填充数据到结构体
+						MessageStruct* message = new MessageStruct(m_FriendList.GetItemText(i, 1), strFile);
+						COPYDATASTRUCT MessageData;
+						MessageData.dwData = WM_SendFileMessage;	//发送文件信息标志
+						MessageData.cbData = sizeof(MessageStruct);
+						MessageData.lpData = message;
+						//发送消息
+						pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
+						Sleep(200);
+						//清空文本
+						delete message;
+						UpdateData(FALSE);
+					}
+					else {
+						MessageBox(L"找不到 WeChatHelper 窗口");
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void CFriendList::OnSendcard()
+{
+	// TODO: 在此添加命令处理程序代码
+	CString wx_id ,wx_name;
+	int sel_num = m_FriendList.GetSelectionMark();
+	wx_id = m_FriendList.GetItemText(sel_num, 1);
+	wx_name = m_FriendList.GetItemText(sel_num, 3);
+	if (wx_id != "") {
+		if (MessageBox(TEXT("是否确定发送用户 " + wx_name + " 名片？"), L"提示", MB_YESNO) == IDYES){
+			int m_num = m_FriendList.GetItemCount();
+			for (int i = 0; i < m_num; i++) {
+				if (m_FriendList.GetCheck(i)) {
+					//查找窗口
+					CWnd* pWnd = CWnd::FindWindow(NULL, L"WeChatHelper");
+					if (pWnd != NULL) {
+						//同步控件数据到变量
+						UpdateData(TRUE);
+						CString m_Wxid = m_FriendList.GetItemText(i, 1);
+						unique_ptr<XmlCardMessage> pCardMessage(new XmlCardMessage);
+						wcscpy_s(pCardMessage->RecverWxid, wcslen(m_Wxid) + 1, m_Wxid);
+						wcscpy_s(pCardMessage->SendWxid, wcslen(wx_id) + 1, wx_id);
+						wcscpy_s(pCardMessage->NickName, wcslen(wx_name) + 1, wx_name);
+
+						COPYDATASTRUCT sendcard;
+						sendcard.dwData = WM_SendXmlCard;
+						sendcard.cbData = sizeof(XmlCardMessage);
+						sendcard.lpData = pCardMessage.get();
+						//发送消息
+						pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&sendcard);
+
+						UpdateData(FALSE);
+					}
+					else {
+						MessageBox(L"找不到 WeChatHelper 窗口");
+					}
+				}
+			}
+		}
+	}
+	
+}
