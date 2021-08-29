@@ -31,6 +31,9 @@
     <Filter Include="HTTPRequest">
       <UniqueIdentifier>{6ed83746-8194-4be7-a450-bdd499804b16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CThread">
+      <UniqueIdentifier>{e8b9a223-61ee-46ef-ab09-5cf03795dc9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="My_InjectTools.h">
@@ -84,6 +87,9 @@
     <ClInclude Include="HTTPRequest.hpp">
       <Filter>HTTPRequest</Filter>
     </ClInclude>
+    <ClInclude Include="Thread.h">
+      <Filter>CThread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="My_InjectTools.cpp">
@@ -124,6 +130,9 @@
     </ClCompile>
     <ClCompile Include="test_HttpRequest.cpp">
       <Filter>HTTPRequest</Filter>
+    </ClCompile>
+    <ClCompile Include="Thread.cpp">
+      <Filter>CThread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

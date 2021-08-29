@@ -30,6 +30,7 @@ CFriendList::CFriendList(CWnd* pParent /*=nullptr*/)
 
 CFriendList::~CFriendList()
 {
+
 }
 
 void CFriendList::DoDataExchange(CDataExchange* pDX)
@@ -62,7 +63,6 @@ END_MESSAGE_MAP()
 
 // CFriendList 消息处理程序
 
-
 BOOL CFriendList::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -75,7 +75,11 @@ BOOL CFriendList::OnInitDialog()
 	m_FriendList.InsertColumn(4, L"备注", 0, 253);
 
 	m_FriendList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES);
-
+	
+	//启动发送文本信息线程--------------------------------------------------
+	T_SendMessage.stop();
+	this->SetDlgItemTextW(IDC_Reversechoose, L"发送文本");
+	
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
 }
@@ -470,19 +474,6 @@ void CFriendList::OnSave()
 }
 
 
-void CFriendList::OnBnClickedReversechoose()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	CString s;
-	GetDlgItemText(IDC_CH_Forward, s);
-	if (IsDlgButtonChecked(IDC_CH_Forward)) {
-		MessageBox(s);
-	}
-}
-
-
-
-
 void CFriendList::OnSendimg()
 {
 	// TODO: 在此添加命令处理程序代码
@@ -614,4 +605,22 @@ void CFriendList::OnSendcard()
 		}
 	}
 	
+}
+
+void CFriendList::OnBnClickedReversechoose()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	/*CString s;
+	GetDlgItemText(IDC_CH_Forward, s);
+	if (IsDlgButtonChecked(IDC_CH_Forward)) {
+		MessageBox(s);
+	}*/
+	if (T_SendMessage.state() == T_SendMessage.Stoped) {
+		T_SendMessage.start();
+		this->SetDlgItemTextW(IDC_Reversechoose, L"暂停发送");
+	}
+	else if (T_SendMessage.state() == T_SendMessage.Running) {
+		T_SendMessage.stop();
+		this->SetDlgItemTextW(IDC_Reversechoose, L"发送文本");
+	}
 }

@@ -48,8 +48,11 @@ string my_HttpPost(string& host, string& data);
 
 string string_To_UTF8(const std::string& str);
 
+string UTF8ToGB(const char* str);
+
 string Wchar_tToString(wchar_t* wchar);
 
 wchar_t* StringToWchar_t(const std::string& str);
 
 void Log(const std::string& type, const std::string& wxid, const std::string& source, const std::string& msgSender, const std::string& content);
+

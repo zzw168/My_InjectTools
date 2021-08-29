@@ -190,6 +190,7 @@
     <ClInclude Include="CMain.h" />
     <ClInclude Include="CMultiOpen.h" />
     <ClInclude Include="CMyTableCtrl.h" />
+    <ClInclude Include="Thread.h" />
     <ClInclude Include="data.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="HTTPRequest.hpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="CMain.cpp" />
     <ClCompile Include="CMultiOpen.cpp" />
     <ClCompile Include="CMyTableCtrl.cpp" />
+    <ClCompile Include="Thread.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="My_InjectTools.cpp" />
     <ClCompile Include="My_InjectToolsDlg.cpp" />

@@ -239,6 +239,29 @@ string string_To_UTF8(const std::string& str)
 	return retStr;
 }
 
+string UTF8ToGB(const char* str)
+{
+	string result;
+	WCHAR* strSrc;
+	LPSTR szRes;
+
+	//获得临时变量的大小
+	int i = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
+	strSrc = new WCHAR[i + 1];
+	MultiByteToWideChar(CP_UTF8, 0, str, -1, strSrc, i);
+
+	//获得临时变量的大小
+	i = WideCharToMultiByte(CP_ACP, 0, strSrc, -1, NULL, 0, NULL, NULL);
+	szRes = new CHAR[i + 1];
+	WideCharToMultiByte(CP_ACP, 0, strSrc, -1, szRes, i, NULL, NULL);
+
+	result = szRes;
+	delete[]strSrc;
+	delete[]szRes;
+
+	return result;
+}
+
 //************************************************************
 // 函数名称: Wchar_tToString
 // 函数说明: wchar转string
@@ -274,7 +297,7 @@ wchar_t* StringToWchar_t(const std::string& str)
 	wchar_t* m_chatroommmsg = new wchar_t[str.size()+1];  //
 	memset(m_chatroommmsg, 0, str.size()+1);
 	//setlocale(LC_ALL, "zh_CN.UTF-8");
-	setlocale(LC_ALL, "chs");
+	setlocale(LC_ALL, "");
 	swprintf(m_chatroommmsg, str.size()+1, L"%S", str.c_str());
 
 	return m_chatroommmsg;
