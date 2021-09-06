@@ -13,7 +13,6 @@
 #include "CMain.h"
 #include <fstream>
 
-
 DWORD g_index = 0;
 
 // CChatRecords 对话框
@@ -79,6 +78,7 @@ string my_HttpPost(string& host, string& data)	//
 	return result;
 }
 
+
 //************************************************************
 // 函数名称: OnShowmessage
 // 函数说明: 响应Showmessage消息 处理父窗口发过来的消息
@@ -120,9 +120,9 @@ afx_msg LRESULT CChatRecords::OnShowmessage(WPARAM wParam, LPARAM lParam)
 	GetDlgItem(IDC_ED_MB)->GetWindowText(Ed_wxmember);
 	string s_Ed_wxmember = CT2A(Ed_wxmember.GetString());	//消息发送者
 	if ((0 == strcmp(type.c_str(), "文字")) 
-		&& (0 == strcmp(wxid.c_str(), s_Ed_wxid.c_str()))
-		&& ((0 == strcmp(sendername.c_str(), s_Ed_wxmember.c_str()))||(m_CheckAll.GetCheck()))
-		&&((Ed_Accept !="")||(m_CH_Post.GetCheck()))) {
+		&& (0 == strcmp(wxid.c_str(), s_Ed_wxid.c_str()))	//对比监听微信ID
+		&& ((0 == strcmp(sendername.c_str(), s_Ed_wxmember.c_str()))||(m_CheckAll.GetCheck()))	//对比监听群成员ID，或者监听全群
+		&&((Ed_Accept !="")||(m_CH_Post.GetCheck()))) {		//判断接收者ID ,或者发送到IP地址
 		//string content = Wchar_tToString(msg->content);
 		string& m_content = content + "\n发送者:" + wxid + " 成员:" + sendername +"\n---------------------------";
 
@@ -132,26 +132,8 @@ afx_msg LRESULT CChatRecords::OnShowmessage(WPARAM wParam, LPARAM lParam)
 			try {
 				CMain* m_Main = (CMain*)this->GetParent()->GetParent();
 				if (m_Main->m_MyTable.m_Dia[0]->IsDlgButtonChecked(IDC_CH_Forward)) {
-					CListCtrl* m_ListCtrl = (CListCtrl*)m_Main->m_MyTable.m_Dia[0]->GetDlgItem(IDC_FRIENDLIST);
-					int m_num = m_ListCtrl->GetItemCount();
-					for (int i = 0; i < m_num; i++) {
-						if (m_ListCtrl->GetCheck(i)) {
-							string id_wx = CT2A(m_ListCtrl->GetItemText(i, 1));
-
-							//填充数据到结构体
-							MessageStruct* message = new MessageStruct(StringToWchar_t(id_wx), StringToWchar_t(m_content));
-							COPYDATASTRUCT MessageData;
-							MessageData.dwData = WM_SendTextMessage;
-							MessageData.cbData = sizeof(MessageStruct);
-							MessageData.lpData = message;
-
-							//发送消息
-							pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&MessageData);
-							Sleep(200);
-							//清空文本
-							delete message;
-						}
-					}
+					MessageStruct* message = new MessageStruct(TEXT("GMessage"), CA2T(m_content.c_str()));
+					m_Main->m_MyTable.m_Dia[0]->SendMessage(WM_MAMESSAGE, (WPARAM)message, 0);
 				}
 				//转发信息到 指定微信id**************************************************
 				else if (Ed_Accept != "") {
@@ -200,7 +182,6 @@ afx_msg LRESULT CChatRecords::OnShowmessage(WPARAM wParam, LPARAM lParam)
 			infile.close();
 		}
 	}
-
 	return 0;
 }
 

@@ -89,6 +89,22 @@ BOOL CMain::OnInitDialog()
 		m_MyTable.m_Dia[i]->ShowWindow(SW_HIDE);
 	}
 
+	//画出进度条
+	CRect rect, e_rect, proRect;
+
+	CFriendList* m_FriLDlg = (CFriendList*)m_MyTable.m_Dia[0];
+	m_FriLDlg->m_Message.GetWindowRect(&rect);//获取控件的屏幕坐标
+	ScreenToClient(&rect);//转换为对话框上的客户坐标
+
+	proRect.left = rect.left-2;
+	proRect.top = rect.bottom;
+	proRect.right = rect.right-2;
+	proRect.bottom = rect.bottom + 2;
+	//WS_CHILD|WS_VISIBLE|PBS_SMOOTHREVERSE 
+	myProCtrl.Create(WS_VISIBLE, proRect, this, 99); //创建位置、大小
+	myProCtrl.SetRange(0, 10);
+	myProCtrl.SetPos(10);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
 }
@@ -143,7 +159,15 @@ void CMain::OnSize(UINT nType, int cx, int cy)
 
 afx_msg LRESULT CMain::OnMymessage(WPARAM wParam, LPARAM lParam)
 {
-	MessageBox(L"ADFA~",L"DFS",MB_OK);
+	//MessageBox(L"ADFA~",L"DFS",MB_OK);
+	MessageStruct* msg = (MessageStruct*)wParam;
+	CString num = (msg->msgdata1);
+	CString str = (msg->msgdata2);
+	if (num == "Progress") {
+		int i = _tstoi(str);
+		myProCtrl.SetPos(i);
+	}
+
 	return 0;
 }
 
@@ -153,4 +177,24 @@ void CMain::OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// TODO: 在此添加控件通知处理程序代码
 	*pResult = 0;
+}
+
+//************************************************************
+// 函数名称: OnWxLogout
+// 函数说明: 响应退出微信菜单
+// 作    者: GuiShou
+// 时    间: 2019/6/30
+// 参    数: void
+// 返 回 值: void
+//***********************************************************
+void CMain::OnWxLogout()
+{
+	//查找窗口
+	CWnd* pWnd = CWnd::FindWindow(NULL, L"WeChatHelper");
+	COPYDATASTRUCT logout;
+	logout.dwData = WM_Logout;
+	logout.cbData = 0;
+	logout.lpData = NULL;
+	//发送消息
+	pWnd->SendMessage(WM_COPYDATA, NULL, (LPARAM)&logout);
 }

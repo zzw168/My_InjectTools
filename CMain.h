@@ -27,6 +27,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CMyTableCtrl m_MyTable;
+	CProgressCtrl myProCtrl;
+
 	virtual BOOL OnInitDialog();
 	afx_msg void OnTcnSelchangeFriendlist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
@@ -35,4 +37,5 @@ protected:
 	afx_msg LRESULT OnMymessage(WPARAM wParam, LPARAM lParam);
 public:
 	afx_msg void OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult);
+	void OnWxLogout();
 };
